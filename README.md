@@ -136,7 +136,7 @@ streammax-fatigue-prediction/
 
 <div align="center">
 
-*Built by Team Gyanvardhak (Tanishq Sethi & Vaibhav Mathpal), MAIT Delhi*
+*Built by Tanishq Sethi*
 
 </div>
 ```
