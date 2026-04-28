@@ -1,6 +1,7 @@
+```markdown
 <div align="center">
 
-```
+```text
 ███████╗████████╗██████╗ ███████╗ █████╗ ███╗   ███╗███╗   ███╗ █████╗ ██╗  ██╗
 ██╔════╝╚══██╔══╝██╔══██╗██╔════╝██╔══██╗████╗ ████║████╗ ████║██╔══██╗╚██╗██╔╝
 ███████╗   ██║   ██████╔╝█████╗  ███████║██╔████╔██║██╔████╔██║███████║ ╚███╔╝ 
@@ -9,54 +10,44 @@
 ╚══════╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝
 ```
 
-**Predicting viewer disengagement before they even know they're leaving.**
+**Predicting viewer disengagement before they even know they are leaving.**
 
 [![Python](https://img.shields.io/badge/Python-3.10+-3776ab?style=flat-square&logo=python&logoColor=white)](https://python.org)
-[![AUC-ROC](https://img.shields.io/badge/AUC--ROC-0.791+-success?style=flat-square)](/)
+[![AUC-ROC](https://img.shields.io/badge/AUC_ROC-0.791+-success?style=flat-square)](/)
 [![Models](https://img.shields.io/badge/Ensemble-CatBoost%20%2B%20XGB%20%2B%20LGB-orange?style=flat-square)](/)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
 
+[![StreamMax Dashboard Preview](assets/streammax_demo.gif)](https://streammax-analytics.netlify.app)
+
+*Click the dashboard preview above to launch the live interactive simulation.*
+
 </div>
 
----
-
-## What This Is
-
-Every streaming platform hemorrhages subscribers quietly. Not in dramatic cancellations, but in the slow drift — sessions getting shorter, genres narrowing, the app opening less and less until one day the subscription just... lapses.
-
-By then, it's too late. The user is mentally gone.
-
-This project builds a system that catches that drift *early* — predicting "engagement fatigue" 30 days before it becomes churn. We call these users **fatigued**, not churned, because that distinction matters: intervening at the fatigue stage is exponentially cheaper and more effective than re-acquiring a lost subscriber.
-
-The model was built on behavioral data from 10,000 users of a streaming platform — watch velocity, binge patterns, genre breadth, session decay — and achieves **AUC-ROC > 0.79** using a weighted ensemble of gradient boosting models with domain-informed monotone constraints.
-
-It works on any subscription streaming service. The behavioral patterns of disengagement are the same whether you're watching Bollywood blockbusters on Hotstar or prestige drama on any western platform.
-
----
-
 ## The Problem, Precisely
+Subscription platforms do not lose users in a single moment. Churn is a slow degradation of engagement that happens over weeks. By the time a user formally cancels, the decision was already made 30 days prior.
 
-```
-Standard churn detection:
-  User stops paying → Platform notices → Platform tries to win them back
-  
-  Cost to re-acquire: ₹800–2000 per user
+```text
+Standard reactive churn detection:
+  User stops paying -> Platform notices -> Platform tries to win them back
+  Cost to re-acquire: ₹800 to 2000 per user
   Success rate: ~15%
 
-This system:
-  User's watch time drops 30% week-over-week → Model flags them → Intervention triggers
-  
-  Cost to retain: ₹80–200 per user  
+This predictive system:
+  User's watch time drops 30% week-over-week -> Model flags them -> Intervention triggers
+  Cost to retain: ₹80 to 200 per user  
   Success rate: ~60%
 ```
 
-The math is obvious. The hard part is knowing *who* to target and *when*. That's what this solves.
+The math is obvious. The hard part is knowing *who* to target and *when*. This project solves exactly that.
 
----
+## The Solution
+This system is an end-to-end predictive machine learning pipeline designed to identify "engagement fatigue" 30 days before it becomes churn. We call these users **fatigued**, not churned, because intervening at the fatigue stage is exponentially cheaper and more effective.
 
-## Architecture
+The model was built on behavioral data from 10,000 users. By engineering 88 behavioral features capturing watch velocity, session decay, and binge exhaustion, the ensemble model predicts disengagement with a **0.791 AUC-ROC**, allowing for targeted retention interventions. 
 
-```
+## Technical Architecture
+
+```text
 Raw Behavioral Data (13 features)
          │
          ▼
@@ -72,11 +63,11 @@ Raw Behavioral Data (13 features)
          │
          ▼
 ┌─────────────────────────────────────────────────────────┐
-│                  Stratified 5-Fold CV                    │
-│                                                          │
-│   CatBoost (60%)  ──┐                                   │
-│   XGBoost  (30%)  ──┼──► Weighted Blend ──► Probabilities│
-│   LightGBM (10%)  ──┘                                   │
+│                  Stratified 5-Fold CV                   │
+│                                                         │
+│  CatBoost (60%)  ──┐                                    │
+│  XGBoost  (30%)  ──┼──► Weighted Blend ──► Probabilities│
+│  LightGBM (10%)  ──┘                                    │
 └─────────────────────────────────────────────────────────┘
          │
          ▼
@@ -91,8 +82,6 @@ Raw Behavioral Data (13 features)
     AUC-ROC: 0.791+
 ```
 
----
-
 ## Key Features Engineered
 
 | Feature | What it captures |
@@ -101,33 +90,39 @@ Raw Behavioral Data (13 features)
 | `session_velocity` | Session frequency drop vs expected baseline |
 | `binge_exhaustion_index` | High completion + falling watch time = content exhaustion |
 | `engagement_score` | Composite of recency, frequency, depth |
-| `quality_quantity_ratio` | Minutes × completion rate — quality-adjusted watch time |
+| `quality_quantity_ratio` | Minutes × completion rate = quality-adjusted watch time |
 | `tier_target_enc` | Out-of-fold target encoding of subscription tier |
 
-The model enforces **monotone constraints** on features where directionality is theoretically guaranteed — more days since last session always increases fatigue probability, for example. This prevents spurious reversals that would undermine trust in production.
+The model enforces **monotone constraints** on features where directionality is theoretically guaranteed. For example, more days since the last session always increases fatigue probability. This prevents spurious reversals that would undermine trust in a production environment.
 
----
+## Business Interpretation
+Three distinct user archetypes emerged from the data, dictating the required intervention strategy:
 
-## Results
+1. **Ghost Users:** High tenure, near-zero recent activity. Days since last session: 20+. These users have already mentally churned. Retention cost is high; prioritize understanding *why*.
+2. **Decelerating Bingers:** Recent high engagement that has dropped sharply. High binge history, falling 7-day numbers. These are the highest-value intervention targets. They loved the platform; something specific broke the habit.
+3. **Narrow Consumers:** Active but locked into 1 to 2 genres. Low genre diversity score. Not immediately at risk, but highly vulnerable to a content gap. Recommendation diversification is the play here.
 
+## Running It
+
+**Colab** (recommended, everything runs in-browser):
+```text
+File -> Open notebook -> GitHub -> paste this repo URL
 ```
-LightGBM  OOF AUC : 0.76xxx  (weight = 0.10)
-XGBoost   OOF AUC : 0.78xxx  (weight = 0.30)
-CatBoost  OOF AUC : 0.79xxx  (weight = 0.60)
-──────────────────────────────────
-Final Blend  AUC  : 0.791+
+
+**Local**:
+```bash
+git clone [https://github.com/tanx1509/streammax-fatigue-prediction](https://github.com/tanx1509/streammax-fatigue-prediction)
+cd streammax-fatigue-prediction
+pip install pandas numpy scikit-learn lightgbm catboost xgboost
+jupyter notebook Gyanvardhak_Analysis.ipynb
 ```
-
-Of 2,000 held-out users, approximately 1,000 were flagged as at-risk. The model's probability outputs span from 0.06 (deeply engaged) to 0.94 (severely fatigued), making it suitable for tiered intervention strategies rather than binary targeting.
-
----
+The notebook is self-contained. Run cells top to bottom. Final predictions export automatically to `Gyanvardhak_Predictions.csv`.
 
 ## Repository Structure
-
-```
+```text
 streammax-fatigue-prediction/
 │
-├── Gyanvardhak_Analysis.ipynb    # Full pipeline: EDA → features → ensemble → predictions
+├── Gyanvardhak_Analysis.ipynb    # Full pipeline: EDA -> features -> ensemble -> predictions
 ├── Gyanvardhak_Predictions.csv   # Final predictions (2000 users, probabilities)
 │
 ├── data/
@@ -142,62 +137,9 @@ streammax-fatigue-prediction/
 
 ---
 
-## Running It
-
-**Colab** (recommended — everything runs in-browser):
-
-```
-File → Open notebook → GitHub → paste this repo URL
-```
-
-**Local**:
-
-```bash
-git clone https://github.com/tanx1509/streammax-fatigue-prediction
-cd streammax-fatigue-prediction
-pip install pandas numpy scikit-learn lightgbm catboost xgboost
-jupyter notebook Gyanvardhak_Analysis.ipynb
-```
-
-The notebook is self-contained. Run cells top to bottom. Final predictions export automatically to `Gyanvardhak_Predictions.csv`.
-
----
-
-## Business Interpretation
-
-Three user archetypes emerged from the data:
-
-**Ghost Users** — High tenure, near-zero recent activity. Days since last session: 20+. These users have already mentally churned. Retention cost is high; prioritize understanding *why*.
-
-**Decelerating Bingers** — Recent high engagement that's dropped sharply. High binge history, falling 7-day numbers. These are the highest-value intervention targets. They loved the platform; something specific broke the habit.
-
-**Narrow Consumers** — Active but locked into 1-2 genres. Low genre diversity score. Not immediately at risk, but vulnerable to a content gap. Recommendation diversification is the play here.
-
----
-
-## What Streaming Platforms Can Do With This
-
-1. **Tiered alerts** — Different interventions for 0.5–0.65 (nudge), 0.65–0.8 (offer), 0.8+ (direct outreach)
-2. **Content gap detection** — If high-fatigue users cluster around specific genre exhaustion, that's a commissioning signal
-3. **Recommendation re-weighting** — For flagged users, temporarily bias recommendations toward genres they haven't explored
-4. **Re-engagement timing** — Model output tells you the 30-day window. Intervene at day 10-15, not day 28.
-
----
-
-## Tech Stack
-
-- **Python 3.10+**
-- **CatBoost 1.2** — Primary model, handles categoricals natively, most stable OOF performance
-- **XGBoost** — Second model, strong on interaction features
-- **LightGBM** — Fast baseline, useful for feature selection
-- **scikit-learn** — Cross-validation, permutation importance
-- **pandas / numpy** — Data manipulation
-- **Google Colab** — Training environment
-
----
-
 <div align="center">
 
-*Built by Team Gyanvardhak, MAIT Delhi*
+*Built by Team Gyanvardhak (Tanishq Sethi & Vaibhav Mathpal), MAIT Delhi*
 
 </div>
+```
