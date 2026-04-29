@@ -6,41 +6,63 @@
 ███████║   ██║   ██║  ██║███████╗██║  ██║██║ ╚═╝ ██║██║ ╚═╝ ██║██║  ██║██╔╝ ██╗
 ╚══════╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝
 ```
+```text
+ ██████╗ ██╗   ██╗ █████╗ ███╗   ██╗██╗   ██╗ █████╗ ██████╗ ██████╗ ██╗  ██╗ █████╗ ██╗  ██╗
+██╔════╝ ╚██╗ ██╔╝██╔══██╗████╗  ██║██║   ██║██╔══██╗██╔══██╗██╔══██╗██║  ██║██╔══██╗██║ ██╔╝
+██║  ███╗ ╚████╔╝ ███████║██╔██╗ ██║██║   ██║███████║██████╔╝██║  ██║███████║███████║█████╔╝ 
+██║   ██║  ╚██╔╝  ██╔══██║██║╚██╗██║╚██╗ ██╔╝██╔══██║██╔══██╗██║  ██║██╔══██║██╔══██║██╔═██╗ 
+╚██████╔╝   ██║   ██║  ██║██║ ╚████║ ╚████╔╝ ██║  ██║██║  ██║██████╔╝██║  ██║██║  ██║██║  ██╗
+ ╚═════╝    ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝  ╚═══╝  ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝
+```
 
-**Predicting viewer disengagement before they even know they are leaving.**
+**OTT Subscriber Churn Prediction — Top 5 of 1,000+ Teams | XLRI StrategiX 2.0**
+
+*Predicting engagement fatigue 30 days before it becomes churn.*
 
 [![Python](https://img.shields.io/badge/Python-3.10+-3776ab?style=flat-square&logo=python&logoColor=white)](https://python.org)
-[![AUC-ROC](https://img.shields.io/badge/AUC_ROC-0.791+-success?style=flat-square)](/)
-[![Models](https://img.shields.io/badge/Ensemble-CatBoost%20%2B%20XGB%20%2B%20LGB-orange?style=flat-square)](/)
+[![AUC-ROC](https://img.shields.io/badge/Final_AUC-0.7917-success?style=flat-square)](/)
+[![Improvement](https://img.shields.io/badge/Improvement-+0.0717_over_baseline-blue?style=flat-square)](/)
+[![Models](https://img.shields.io/badge/Ensemble-CatBoost_0.6_×_XGB_0.3_×_LGB_0.1-orange?style=flat-square)](/)
+[![Competition](https://img.shields.io/badge/XLRI_StrategiX_2.0-Top_5_of_1000%2B-gold?style=flat-square)](/)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
 
-[![StreamMax Dashboard Preview](assets/streammax_demo.gif)](https://streammax-analytics.netlify.app)
-
-*Click the dashboard preview above to launch the live interactive simulation.*
-
-</div>
+---
 
 ## The Problem, Precisely
-Subscription platforms do not lose users in a single moment. Churn is a slow degradation of engagement that happens over weeks. By the time a user formally cancels, the decision was already made 30 days prior.
+
+StreamMax was not losing subscribers in a single moment. It was losing them in **slow motion — over 30 days** — while continuing to charge them.
 
 ```text
 Standard reactive churn detection:
-  User stops paying -> Platform notices -> Platform tries to win them back
-  Cost to re-acquire: ₹800 to 2000 per user
-  Success rate: ~15%
+  User stops paying → Platform notices → Platform tries to win them back
+  Cost to re-acquire : ₹800–2,000 per user
+  Success rate       : ~15%
 
-This predictive system:
-  User's watch time drops 30% week-over-week -> Model flags them -> Intervention triggers
-  Cost to retain: ₹80 to 200 per user  
-  Success rate: ~60%
+This system:
+  Watch time drops 30% week-over-week → Model flags user → Intervention triggers
+  Cost to retain     : ₹80–200 per user
+  Success rate       : ~60%
 ```
 
 The math is obvious. The hard part is knowing *who* to target and *when*. This project solves exactly that.
 
-## The Solution
-This system is an end-to-end predictive machine learning pipeline designed to identify "engagement fatigue" 30 days before it becomes churn. We call these users **fatigued**, not churned, because intervening at the fatigue stage is exponentially cheaper and more effective.
+---
 
-The model was built on behavioral data from 10,000 users. By engineering 88 behavioral features capturing watch velocity, session decay, and binge exhaustion, the ensemble model predicts disengagement with a **0.791 AUC-ROC**, allowing for targeted retention interventions. 
+## Headline Numbers
+
+| Metric | Value |
+|---|---|
+| Final OOF ROC-AUC | **0.7917** |
+| Baseline AUC (Logistic Regression) | 0.7200 |
+| Total improvement | **+0.0717** |
+| Features engineered | **88** (from 13 raw, +576%) |
+| Models trained across all stages | **12** |
+| CV strategy | Stratified 10-Fold throughout |
+| Pseudo-label samples added | **194** (high-confidence augmentation) |
+| Users at fatigue risk | **35.4%** of 8,000-user train set |
+| AUC ceiling (from max correlation 0.30) | ~0.81 — **0.7917 is near-optimal** |
+
+---
 
 ## Technical Architecture
 
@@ -48,95 +70,212 @@ The model was built on behavioral data from 10,000 users. By engineering 88 beha
 Raw Behavioral Data (13 features)
          │
          ▼
-┌─────────────────────────────────┐
-│      Feature Engineering        │
-│  • Watch Velocity (7d vs 30d)   │
-│  • Session Decay Index          │
-│  • Binge Exhaustion Score       │
-│  • Genre Entropy                │
-│  • Content-Engagement Ratio     │
-│  • Quality×Quantity composite   │
-└─────────────────────────────────┘
-         │
-         ▼
 ┌─────────────────────────────────────────────────────────┐
-│                  Stratified 5-Fold CV                   │
-│                                                         │
-│  CatBoost (60%)  ──┐                                    │
-│  XGBoost  (30%)  ──┼──► Weighted Blend ──► Probabilities│
-│  LightGBM (10%)  ──┘                                    │
+│              Nuclear Feature Engineering                │
+│  • watch_velocity      (7d vs 30d normalized decline)  │
+│  • session_velocity    (recent vs expected baseline)    │
+│  • binge_exhaustion_index (completion × falling watch)  │
+│  • recency_log / recency_squared (monotone penalty)     │
+│  • engagement_score    (composite: time+sessions+compl) │
+│  • recommendation_failure (algo failing the user)       │
+│  • premium_disengagement (tier × (1 - engagement))      │
+│  • genre_diversity_pct / genre_x_completion             │
+│  ... 88 total                                           │
 └─────────────────────────────────────────────────────────┘
          │
          ▼
-┌─────────────────────────────────┐
-│     Pseudo-Label Augmentation   │
-│  High-confidence test samples   │
-│  fed back for CatBoost refit    │
-└─────────────────────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│         Permutation Importance Feature Selection        │
+│   Kill features contributing < 0.001 AUC               │
+│   Uses GBM selector, 10 repeats — no noise survives     │
+└─────────────────────────────────────────────────────────┘
          │
          ▼
-    Final Ensemble Predictions
-    AUC-ROC: 0.791+
+┌─────────────────────────────────────────────────────────┐
+│          Power-Weighted Ensemble (5-Fold Strat CV)      │
+│                                                         │
+│  CatBoost v2  (60%) ──┐                                 │
+│  XGBoost  v2  (30%) ──┼──► Weighted blend ──► OOF probs│
+│  LightGBM v2  (10%) ──┘                                 │
+│                                                         │
+│  Monotonic constraints enforced on 12 features:         │
+│  days_since_last_session → always increases fatigue     │
+│  engagement_score        → always decreases fatigue     │
+└─────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────┐
+│        Meta-Stacking (LR on OOF + top 20 raw feats)    │
+│   Learns which specialist is right when they disagree   │
+│   Meta-stack OOF AUC: 0.7911                            │
+└─────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────┐
+│          Semi-Supervised Pseudo-Labeling                │
+│   194 test samples with prob > 0.88 or < 0.12           │
+│   Added to training set → CatBoost + LGB retrained      │
+└─────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────┐
+│           Rank Calibration (Sigmoid on Ranks)           │
+│   rank_calibrate(probs, k=5.5)                          │
+│   Converts raw probabilities to well-calibrated scores  │
+└─────────────────────────────────────────────────────────┘
+         │
+         ▼
+    Final Predictions — AUC 0.7917
+    Gyanvardhak_Predictions.csv (2,000 users)
 ```
+
+---
+
+## Complete Model Progression
+
+Every stage logged. Every AUC documented. No cherry-picking.
+
+| Stage | Model | OOF AUC | Status |
+|---|---|---|---|
+| 1 | Logistic Regression | 0.7200 | REJECTED — baseline only |
+| 2 | Random Forest | 0.7810 | Baseline |
+| 3 | Extra Trees | 0.7791 | Baseline |
+| 4 | XGBoost v1 | 0.7889 | Layer 1 |
+| 5 | XGBoost v2 | 0.7860 | Layer 1 |
+| 6 | LightGBM v1 | 0.7871 | Layer 1 |
+| 7 | LightGBM v2 | 0.7812 | Layer 1 |
+| 8 | CatBoost v1 | 0.7902 | Layer 1 |
+| 9 | **CatBoost v2** | **0.7904** | Layer 1 champion |
+| 10 | Meta-Stack (LR on OOF) | 0.7911 | Champion v1 |
+| 11 | + Pseudo-Labeling | 0.7917 | Champion v2 |
+| 12 | **Final (10-Fold + SWA)** | **0.7917** | **FINAL SUBMISSION** |
+
+Total gain over baseline: **+0.0717 AUC.**
+
+---
 
 ## Key Features Engineered
 
-| Feature | What it captures |
-|---|---|
-| `watch_velocity` | Rate of decline: 7-day avg vs 30-day avg, normalized |
-| `session_velocity` | Session frequency drop vs expected baseline |
-| `binge_exhaustion_index` | High completion + falling watch time = content exhaustion |
-| `engagement_score` | Composite of recency, frequency, depth |
-| `quality_quantity_ratio` | Minutes × completion rate = quality-adjusted watch time |
-| `tier_target_enc` | Out-of-fold target encoding of subscription tier |
+| Feature | Formula / Logic | Why it works |
+|---|---|---|
+| `watch_velocity` | `(7d_avg − 30d_avg) / 30d_avg` | Rate of decline, normalized |
+| `session_velocity` | `(actual_7d − expected_7d) / expected_7d` | Acceleration of disengagement |
+| `binge_exhaustion_index` | `completion_rate × (1 − 7d/30d ratio)` | High completion + falling time = content exhausted |
+| `recency_log` | `log1p(days_since_last_session)` | Log-transform amplifies small gaps; monotone constraint enforced |
+| `engagement_score` | `0.35×time + 0.25×sessions + 0.20×completion + 0.20×rec_click` | Composite recency-frequency-depth score |
+| `recommendation_failure` | `(1 − rec_click_rate) × (1 − 7d_minutes/300)` | Algorithm failing user = churn accelerator |
+| `premium_disengagement` | `tier_encoded × (1 − engagement_score)` | Premium + low engagement = highest churn cost |
+| `genre_diversity_pct` | `unique_genres / 15.0` | Narrow consumer = content gap vulnerability |
 
-The model enforces **monotone constraints** on features where directionality is theoretically guaranteed. For example, more days since the last session always increases fatigue probability. This prevents spurious reversals that would undermine trust in a production environment.
+**Monotonic constraints** enforced on 12 features — prevents spurious reversals that would undermine trust in production. `days_since_last_session` must always increase fatigue probability. No exceptions.
 
-## Business Interpretation
-Three distinct user archetypes emerged from the data, dictating the required intervention strategy:
+---
 
-1. **Ghost Users:** High tenure, near-zero recent activity. Days since last session: 20+. These users have already mentally churned. Retention cost is high; prioritize understanding *why*.
-2. **Decelerating Bingers:** Recent high engagement that has dropped sharply. High binge history, falling 7-day numbers. These are the highest-value intervention targets. They loved the platform; something specific broke the habit.
-3. **Narrow Consumers:** Active but locked into 1 to 2 genres. Low genre diversity score. Not immediately at risk, but highly vulnerable to a content gap. Recommendation diversification is the play here.
+## Three User Archetypes
+
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│  GHOST USERS          (fatigue prob > 0.80)                     │
+│  Tenure: high. Recent activity: near-zero. Days since login 20+ │
+│  These users have already mentally churned.                     │
+│  Action: survey why — do not waste high-value retention offers  │
+├─────────────────────────────────────────────────────────────────┤
+│  DECELERATING BINGERS (fatigue prob 0.50–0.80)  ← GOLD MINE    │
+│  Recent high engagement that has dropped sharply.               │
+│  They loved the platform. Something specific broke the habit.   │
+│  Action: personalized content digest + recommendation override  │
+├─────────────────────────────────────────────────────────────────┤
+│  NARROW CONSUMERS     (fatigue prob 0.35–0.50)                  │
+│  Active but locked into 1–2 genres. Low diversity score.        │
+│  Not immediately at risk. Vulnerable to content gaps.           │
+│  Action: recommendation diversification — proactive, not rescue │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## The Recommendation Algorithm Death Spiral
+
+This is the systemic insight the model uncovered. When `rec_click_rate` drops, the algorithm interprets it as "user dislikes content" and serves increasingly niche material — which accelerates disengagement further:
+
+```text
+Low engagement
+    → Algorithm shows niche content
+        → Even lower engagement
+            → User mentally cancels
+                → Cancellation button is a formality
+```
+
+**Fix:** Override the recommendation algorithm for users whose `rec_click_rate` has dropped >30% — force proven popular content until engagement stabilises. The model flags exactly who needs this override.
+
+---
+
+## Prediction Output
+
+`Gyanvardhak_Predictions.csv` — calibrated fatigue probabilities for all 2,000 test users.
+
+```
+user_id, predicted_fatigue_probability
+U000400, 0.094   ← Low risk   (< 0.30)
+U006407, 0.657   ← Medium risk (0.30–0.70)
+U007248, 0.853   ← High risk  (> 0.70)
+```
+
+Final distribution (2,000 users):
+- High risk > 0.70: **~530 users**
+- Medium risk 0.30–0.70: **~940 users**
+- Low risk < 0.30: **~530 users**
+
+---
 
 ## Running It
 
-**Colab** (recommended, everything runs in-browser):
+**Colab** (zero setup):
 ```text
-File -> Open notebook -> GitHub -> paste this repo URL
+File → Open notebook → GitHub → paste this repo URL
+Open Gyanvardhak_Analysis.ipynb → Runtime → Run all
 ```
 
-**Local**:
+**Local:**
 ```bash
-git clone [https://github.com/tanx1509/streammax-fatigue-prediction](https://github.com/tanx1509/streammax-fatigue-prediction)
-cd streammax-fatigue-prediction
-pip install pandas numpy scikit-learn lightgbm catboost xgboost
+git clone https://github.com/tanx1509/gyanvardhak-streammax
+cd gyanvardhak-streammax
+pip install pandas numpy scikit-learn lightgbm catboost xgboost matplotlib seaborn
 jupyter notebook Gyanvardhak_Analysis.ipynb
 ```
-The notebook is self-contained. Run cells top to bottom. Final predictions export automatically to `Gyanvardhak_Predictions.csv`.
+
+Run cells top to bottom. Final predictions export automatically to `Gyanvardhak_Predictions.csv`.
+
+---
 
 ## Repository Structure
+
 ```text
-streammax-fatigue-prediction/
+gyanvardhak-streammax/
 │
-├── Gyanvardhak_Analysis.ipynb    # Full pipeline: EDA -> features -> ensemble -> predictions
-├── Gyanvardhak_Predictions.csv   # Final predictions (2000 users, probabilities)
+├── Gyanvardhak_Analysis.ipynb      # Full pipeline: EDA → features → ensemble → predictions
+├── Gyanvardhak_Predictions.csv     # Final calibrated predictions (2,000 users)
 │
 ├── data/
-│   ├── ott_train.csv             # 8,000 users with fatigue_label
-│   └── ott_test.csv              # 2,000 users, no label (prediction target)
+│   ├── ott_train.csv               # 8,000 users with fatigue_label
+│   └── ott_test.csv                # 2,000 users, no label
 │
-├── simulation/
-│   └── index.html                # Interactive StreamMax-style dashboard
+├── assets/
+│   ├── eda_distributions.png       # Engaged vs Fatigued feature distributions
+│   ├── feature_importance.png      # Nuclear feature ranking with AUC threshold
+│   └── viz_summary_progression.png # Full model progression chart
 │
 └── README.md
 ```
 
 ---
 
-<div align="center">
+## Stack
 
-*Built by Tanishq Sethi*
+Python 3.10 · Pandas · NumPy · Scikit-learn · LightGBM · CatBoost · XGBoost · Matplotlib · Seaborn
 
-</div>
-```
+---
+
+*Team Gyanvardhak — Tanishq Sethi & Vaibhav Mathpal*
+*Maharaja Agrasen Institute of Technology, Delhi*
+*XLRI StrategiX 2.0 | Top 5 of 1,000+ Teams*
